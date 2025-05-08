@@ -6,6 +6,7 @@ const socket = io("https://omegle-z4fa.onrender.com"); // change to your backend
 
 const VideoChat = () => {
   const [roomId, setRoomId] = useState("");
+  const [peerId, setPeerId] = useState(null);
   const [joined, setJoined] = useState(false);
   const localVideoRef = useRef();
   const remoteVideoRef = useRef();
@@ -18,9 +19,11 @@ const VideoChat = () => {
   useEffect(() => {
     socket.on("room-joined", () => setJoined(true));
 
-    socket.on("peer-connected", () => {
-      createOffer();
-    });
+    socket.on("peer-connected", ({ peerId }) => {
+        setPeerId(peerId);
+        createOffer(peerId);
+      });
+      
 
     socket.on("offer", async ({ offer, from }) => {
       await createAnswer(offer);
@@ -58,31 +61,33 @@ const VideoChat = () => {
     );
 
     peerConnectionRef.current.onicecandidate = (event) => {
-      if (event.candidate) {
-        socket.emit("ice-candidate", {
-          candidate: event.candidate,
-          to: roomId,
-        });
-      }
-    };
+        if (event.candidate) {
+          socket.emit("ice-candidate", {
+            candidate: event.candidate,
+            to: peerId,
+          });
+        }
+      };
 
     peerConnectionRef.current.ontrack = (event) => {
       remoteVideoRef.current.srcObject = event.streams[0];
     };
   };
 
-  const createOffer = async () => {
+  const createOffer = async (peerId) => {
     const offer = await peerConnectionRef.current.createOffer();
     await peerConnectionRef.current.setLocalDescription(offer);
-    socket.emit("offer", { offer, to: roomId });
+    socket.emit("offer", { offer, to: peerId });
   };
+  
 
   const createAnswer = async (offer) => {
     await peerConnectionRef.current.setRemoteDescription(offer);
     const answer = await peerConnectionRef.current.createAnswer();
     await peerConnectionRef.current.setLocalDescription(answer);
-    socket.emit("answer", { answer, to: roomId });
+    socket.emit("answer", { answer, to: peerId });
   };
+  
 
   const joinRoom = async () => {
     await startMedia();
