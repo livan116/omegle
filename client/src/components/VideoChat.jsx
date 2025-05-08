@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:3000"); // change to your backend
+const socket = io("https://omegle-z4fa.onrender.com"); // change to your backend
 
 const VideoChat = () => {
   const [roomId, setRoomId] = useState("");

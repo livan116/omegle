@@ -19,7 +19,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // your Vite dev server
+    origin: CLIENT_ORIGIN, // your Vite dev server
     methods: ["GET", "POST"],
     credentials: true,
   })
@@ -30,7 +30,7 @@ const { PORT, CLIENT_ORIGIN } = loadServerConfig();
 // Initialize Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // allow frontend origin
+    origin: CLIENT_ORIGIN, // allow frontend origin
     methods: ["GET", "POST"],
     credentials: true,
   },
