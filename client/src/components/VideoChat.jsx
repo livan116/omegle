@@ -70,7 +70,10 @@ const VideoChat = () => {
       };
 
     peerConnectionRef.current.ontrack = (event) => {
-      remoteVideoRef.current.srcObject = event.streams[0];
+        console.log("Remote track received");
+        if (remoteVideoRef.current) {
+          remoteVideoRef.current.srcObject = event.streams[0];
+        }      
     };
   };
 
