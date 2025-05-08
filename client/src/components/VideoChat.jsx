@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 
@@ -20,10 +19,9 @@ const VideoChat = () => {
     socket.on("room-joined", () => setJoined(true));
 
     socket.on("peer-connected", ({ peerId }) => {
-        setPeerId(peerId);
-        createOffer(peerId);
-      });
-      
+      setPeerId(peerId);
+      createOffer(peerId);
+    });
 
     socket.on("offer", async ({ offer, from }) => {
       await createAnswer(offer);
@@ -56,27 +54,28 @@ const VideoChat = () => {
 
     peerConnectionRef.current = new RTCPeerConnection(ICE_SERVERS);
 
-    stream.getTracks().forEach((track) =>
-      peerConnectionRef.current.addTrack(track, stream)
-    );
+    stream
+      .getTracks()
+      .forEach((track) => peerConnectionRef.current.addTrack(track, stream));
 
     peerConnectionRef.current.onicecandidate = (event) => {
-        if (event.candidate) {
-          socket.emit("ice-candidate", {
-            candidate: event.candidate,
-            to: peerId,
-          });
-        }
-      };
+      if (event.candidate) {
+        socket.emit("ice-candidate", {
+          candidate: event.candidate,
+          to: peerId,
+        });
+      }
+    };
 
-      peerConnectionRef.current.ontrack = (event) => {
-        console.log("Remote track received", event.streams[0]);
-      
-        // Only assign if not already assigned
-        if (remoteVideoRef.current && remoteVideoRef.current.srcObject !== event.streams[0]) {
-          remoteVideoRef.current.srcObject = event.streams[0];
-        }
-      };
+    peerConnectionRef.current.ontrack = (event) => {
+      console.log("Remote track received", event.streams[0]);
+
+
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = event.streams[0];
+        remoteVideoRef.current.play().catch(console.error); // <== Add this
+      }
+    };
   };
 
   const createOffer = async (peerId) => {
@@ -84,7 +83,6 @@ const VideoChat = () => {
     await peerConnectionRef.current.setLocalDescription(offer);
     socket.emit("offer", { offer, to: peerId });
   };
-  
 
   const createAnswer = async (offer) => {
     await peerConnectionRef.current.setRemoteDescription(offer);
@@ -92,7 +90,6 @@ const VideoChat = () => {
     await peerConnectionRef.current.setLocalDescription(answer);
     socket.emit("answer", { answer, to: peerId });
   };
-  
 
   const joinRoom = async () => {
     await startMedia();
@@ -114,8 +111,14 @@ const VideoChat = () => {
       )}
 
       <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
-      <video ref={localVideoRef} autoPlay muted width={300} />
-      <video ref={remoteVideoRef} autoPlay width={300} />
+        <video ref={localVideoRef} autoPlay muted width={300} />
+        <video
+          ref={remoteVideoRef}
+          autoPlay
+          playsInline
+          width={300}
+          style={{ backgroundColor: "black" }}
+        />
       </div>
     </div>
   );
