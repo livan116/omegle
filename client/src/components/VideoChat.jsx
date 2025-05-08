@@ -68,14 +68,19 @@ const VideoChat = () => {
     };
 
     peerConnectionRef.current.ontrack = (event) => {
-      console.log("Remote track received", event.streams[0]);
-
-
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = event.streams[0];
-        remoteVideoRef.current.play().catch(console.error); // <== Add this
-      }
-    };
+        console.log("Remote track received", event.streams[0]);
+      
+        if (remoteVideoRef.current) {
+          remoteVideoRef.current.srcObject = event.streams[0];
+      
+          remoteVideoRef.current.onloadedmetadata = () => {
+            remoteVideoRef.current.play().catch((err) => {
+              console.error("Auto-play failed:", err);
+            });
+          };
+        }
+      };
+      
   };
 
   const createOffer = async (peerId) => {
