@@ -69,12 +69,14 @@ const VideoChat = () => {
         }
       };
 
-    peerConnectionRef.current.ontrack = (event) => {
-        console.log("Remote track received");
-        if (remoteVideoRef.current) {
+      peerConnectionRef.current.ontrack = (event) => {
+        console.log("Remote track received", event.streams[0]);
+      
+        // Only assign if not already assigned
+        if (remoteVideoRef.current && remoteVideoRef.current.srcObject !== event.streams[0]) {
           remoteVideoRef.current.srcObject = event.streams[0];
-        }      
-    };
+        }
+      };
   };
 
   const createOffer = async (peerId) => {
@@ -112,8 +114,8 @@ const VideoChat = () => {
       )}
 
       <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
-        <video ref={localVideoRef} autoPlay muted width={300} />
-        <video ref={remoteVideoRef} autoPlay width={300} />
+      <video ref={localVideoRef} autoPlay muted width={300} />
+      <video ref={remoteVideoRef} autoPlay width={300} />
       </div>
     </div>
   );
