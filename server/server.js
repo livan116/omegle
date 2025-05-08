@@ -17,15 +17,17 @@ const server = http.createServer(app);
 app.use(cors());
 app.use(express.json());
 
-app.use(
-  cors({
-    origin: CLIENT_ORIGIN, // your Vite dev server
-    methods: ["GET", "POST"],
-    credentials: true,
-  })
-);
+
 // Load Config
 const { PORT, CLIENT_ORIGIN } = loadServerConfig();
+
+app.use(
+    cors({
+      origin: CLIENT_ORIGIN, // your Vite dev server
+      methods: ["GET", "POST"],
+      credentials: true,
+    })
+  );
 
 // Initialize Socket.IO
 const io = new Server(server, {
